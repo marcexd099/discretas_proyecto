@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Secuencia de De Bruijn</title>
+    <style>
+        /* Estilos CSS para el documento */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos para el título */
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Estilos para las etiquetas */
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* Estilos para el input de tipo número */
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        /* Estilos para el botón */
+        button {
+            padding: 8px 20px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Estilos para el botón al pasar el cursor sobre él */
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilos para la tabla */
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+
+        /* Estilos para las celdas de la tabla */
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* Estilos para resaltar las celdas */
+        .pintado {
+            background-color: #ff0;
+        }
+
+        /* Estilos para la lista de combinaciones */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Estilos para los elementos de la lista */
+        li {
+            margin-bottom: 5px;
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 5px;
+            border-left: 4px solid #4caf50;
+        }
+
+        /* Estilos para el contador */
+        #contador {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Título de la página -->
+        <h1>Generador de Secuencia de De Bruijn</h1>
+        <!-- Etiqueta y campo de entrada para el orden de la secuencia -->
+        <h4>Ingresa un numero del 1 al 10:</h4>
+        <label for="orden">Orden:</label>
+        <input type="number" id="orden" min="1" step="1">
+        <!-- Botón para generar la secuencia -->
+        <button onclick="generarSecuencia()">Generar Secuencia</button>
+        <!-- Contador de tiempo -->
+        <div id="contador"></div>
+        <!-- Contenedor para la tabla de la secuencia -->
+        <div id="contenedor-tabla"></div>
+        <!-- Contenedor para la lista de combinaciones -->
+        <div id="combinaciones"></div>
+    </div>
+
+    <!-- Script JavaScript para la lógica de generación de secuencias -->
+    <script>
+        // Función de búsqueda en profundidad (DFS) para generar los bordes de la secuencia
+        function dfs(nodo, k, A, visitados, bordes) {
+            for (let i = 0; i < k; ++i) {
+                const str = nodo + A[i];
+                if (!visitados.has(str)) {
+                    visitados.add(str);
+                    dfs(str.substr(1), k, A, visitados, bordes);
+                    bordes.push(i);
+                }
+            }
+        }
+
+        // Función principal para generar la secuencia de De Bruijn
+        function deBruijn(n, k, A) {
+            const visitados = new Set();
+            const bordes = [];
+            const nodoInicial = A[0].repeat(n - 1);
+            dfs(nodoInicial, k, A, visitados, bordes);
+            const secuencia = [];
+            const l = Math.pow(k, n);
+            for (let i = 0; i < l; ++i)
+                secuencia.push(A[bordes[i]]);
+            secuencia.push(...nodoInicial.split(''));
+            return secuencia;
+        }
+
+        // Función para generar la secuencia al hacer clic en el botón
+        function generarSecuencia() {
+            // Obtener el valor del orden ingresado por el usuario
+            const n = parseInt(document.getElementById('orden').value);
+            // Longitud de la secuencia binaria (0 y 1)
+            const k = 2;
+            // Alfabeto de la secuencia binaria
+            const A = "01";
+            // Generar la secuencia de De Bruijn
+            const secuencia = deBruijn(n, k, A);
+            // Mostrar contador de tiempo
+            const contadorDiv = document.getElementById('contador');
+            contadorDiv.textContent = 'Tiempo: 0 segundos';
+            // Iniciar contador
+            let tiempo = 0;
+            const intervaloContador = setInterval(() => {
+                tiempo++;
+                contadorDiv.textContent = `Tiempo: ${tiempo} segundos`;
+            }, 1000);
+            // Mostrar la secuencia en una tabla
+            const contenedorTabla = document.getElementById('contenedor-tabla');
+            contenedorTabla.innerHTML = '';
+            const tabla = document.createElement('table');
+            const fila = document.createElement('tr');
+            for (let i = 0; i < secuencia.length; i++) {
+                const celda = document.createElement('td');
+                celda.textContent = secuencia[i];
+                fila.appendChild(celda);
+            }
+            tabla.appendChild(fila);
+            contenedorTabla.appendChild(tabla);
+            // Resaltar celdas de la tabla cada segundo
+            const celdas = fila.querySelectorAll('td');
+            let index = 0;
+            const intervaloResaltado = setInterval(() => {
+                celdas.forEach((celda, i) => {
+                    celda.classList.remove('pintado');
+                    if ((i >= index && i < index + n) || (index + n > secuencia.length && i < (index + n) % secuencia.length)) {
+                        celda.classList.add('pintado');
+                    }
+                });
+                index = (index + 1) % secuencia.length;
+            }, 1000);
+            // Mostrar combinaciones y detener el contador cuando se completa la compilación
+            const combinacionesDiv = document.getElementById('combinaciones');
+            combinacionesDiv.innerHTML = '';
+            const listaCombinaciones = document.createElement('ul');
+            combinacionesDiv.appendChild(listaCombinaciones);
+            const combinaciones = [];
+            for (let i = 0; i < secuencia.length - n + 1; i++) {
+                combinaciones.push(secuencia.slice(i, i + n).join(''));
+            }
+            let combinacionIndex = 0;
+            const intervaloCombinaciones = setInterval(() => {
+                if (combinacionIndex < combinaciones.length) {
+                    const combinacionItem = document.createElement('li');
+                    combinacionItem.textContent = combinaciones[combinacionIndex];
+                    listaCombinaciones.appendChild(combinacionItem);
+                    combinacionIndex++;
+                } else {
+                    clearInterval(intervaloCombinaciones);
+                    clearInterval(intervaloContador);
+                    contadorDiv.textContent = `Compilación completa, el tiempo es: ${tiempo} segundos`;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>
