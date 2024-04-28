@@ -101,7 +101,7 @@
 
         /* Estilos para el apartado de combinaciones */
         #combinaciones-apartado {
-            margin-top: 20px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -114,6 +114,8 @@
         <h4>Ingresa un numero del 1 al 10:</h4>
         <label for="orden">Orden:</label>
         <input type="number" id="orden" min="1" step="1">
+        <!-- Apartado para mostrar el número de combinaciones -->
+        <div id="combinaciones-apartado"></div>
         <!-- Botón para generar la secuencia -->
         <button onclick="generarSecuencia()">Generar Secuencia</button>
         <!-- Contador de tiempo -->
@@ -122,8 +124,6 @@
         <div id="contenedor-tabla"></div>
         <!-- Contenedor para la lista de combinaciones -->
         <div id="combinaciones"></div>
-        <!-- Apartado para mostrar el número de combinaciones -->
-        <div id="combinaciones-apartado"></div>
     </div>
 
     <!-- Script JavaScript para la lógica de generación de secuencias -->
